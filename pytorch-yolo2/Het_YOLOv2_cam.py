@@ -1,7 +1,24 @@
 import subprocess
+import argparse
 from utils import *
 from darknet import Darknet
 import cv2
+
+# Argument configuration
+parser = argparse.ArgumentParser()
+parser.add_argument("-c", "--cfg",
+		 help = "path to the .cfg file",
+		 )
+parser.add_argument("-w", "--weights",
+		 help = "path to the weights file",
+		 )
+parser.add_argument("-g", "--gpu", type = int, choices=[0, 1],
+		 help = "enables gpu mode for inference 0 (default) for CPU mode and 1 for GPU mode",
+		 default = 0)
+parser.add_argument("-m", "--monitor", type = int, choices=[0, 1],
+		 help = "enables the monitoring of usage percentage of available devices",
+		 default = 0)
+args = parser.parse_args()
 
 def demo(cfgfile, weightfile):
     m = Darknet(cfgfile)
@@ -17,7 +34,7 @@ def demo(cfgfile, weightfile):
         namesfile = 'data/names'
     class_names = load_class_names(namesfile)
  
-    use_cuda = 1
+    use_cuda = args.gpu
     if use_cuda:
         m.cuda()
 
@@ -71,15 +88,10 @@ def demo(cfgfile, weightfile):
 
 ############################################
 if __name__ == '__main__':
-    if len(sys.argv) == 3:
-        cfgfile = sys.argv[1]
-        weightfile = sys.argv[2]
-	device_monitor_process = subprocess.Popen(["python", "../DeviceMonitor.py"])
-        demo(cfgfile, weightfile)
-	device_monitor_process.terminate()
+	if args.monitor:
+		device_monitor_process = subprocess.Popen(["python", "../DeviceMonitor.py"])
+        demo(args.cfg, args.weights)
+	if args.monitor:	
+		device_monitor_process.terminate()
         #demo('cfg/tiny-yolo-voc.cfg', 'tiny-yolo-voc.weights')
-    else:
-        print('Usage:')
-        print('    python demo.py cfgfile weightfile')
-        print('')
-        print('    perform detection on camera')
+
