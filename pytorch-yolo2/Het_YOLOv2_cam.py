@@ -1,3 +1,4 @@
+import subprocess
 from utils import *
 from darknet import Darknet
 import cv2
@@ -73,7 +74,9 @@ if __name__ == '__main__':
     if len(sys.argv) == 3:
         cfgfile = sys.argv[1]
         weightfile = sys.argv[2]
+	device_monitor_process = subprocess.Popen(["python", "../DeviceMonitor.py"])
         demo(cfgfile, weightfile)
+	device_monitor_process.terminate()
         #demo('cfg/tiny-yolo-voc.cfg', 'tiny-yolo-voc.weights')
     else:
         print('Usage:')
