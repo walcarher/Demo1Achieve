@@ -153,15 +153,19 @@ def get_region_boxes(output, conf_thresh, num_classes, anchors, num_anchors, use
     
     sz_hw = h*w
     sz_hwa = sz_hw*num_anchors
-    det_confs = convert2cpu(det_confs)
-    cls_max_confs = convert2cpu(cls_max_confs)
-    cls_max_ids = convert2cpu_long(cls_max_ids)
-    xs = convert2cpu(xs)
-    ys = convert2cpu(ys)
-    ws = convert2cpu(ws)
-    hs = convert2cpu(hs)
+    if use_cuda:
+    	det_confs = convert2cpu(det_confs)
+    	cls_max_confs = convert2cpu(cls_max_confs)
+    	cls_max_ids = convert2cpu_long(cls_max_ids)
+    	xs = convert2cpu(xs)
+    	ys = convert2cpu(ys)
+    	ws = convert2cpu(ws)
+    	hs = convert2cpu(hs)
     if validation:
-        cls_confs = convert2cpu(cls_confs.view(-1, num_classes))
+	if use_cuda:
+        	cls_confs = convert2cpu(cls_confs.view(-1, num_classes))
+	else:
+		cls_confs = cls_confs.view(-1, num_classes)
     t2 = time.time()
     for b in range(batch):
         boxes = []
@@ -235,8 +239,8 @@ def plot_boxes_cv2(img, boxes, savename=None, class_names=None, color=None):
             blue  = get_color(0, offset, classes)
             if color is None:
                 rgb = (red, green, blue)
-            img = cv2.putText(img, class_names[cls_id], (x1,y1), cv2.FONT_HERSHEY_SIMPLEX, 1.2, rgb, 1)
-        img = cv2.rectangle(img, (x1,y1), (x2,y2), rgb, 1)
+            img = cv2.putText(img, class_names[cls_id], (x1,y1), cv2.FONT_HERSHEY_SIMPLEX, 1.2, rgb, 3)
+        img = cv2.rectangle(img, (x1,y1), (x2,y2), rgb, 3)
     if savename:
         print("save plot results to %s" % savename)
         cv2.imwrite(savename, img)

@@ -42,7 +42,7 @@ x_axis = np.arange(len(devices))
 gpuUsageFile = '/sys/devices/gpu.0/load'
 cpuUsageFile = '/proc/stat'
 # Plot characteristics
-fig, ax = plt.subplots(num='Device Usage Monitor', figsize=(7,3))
+fig, ax = plt.subplots(num='Device Usage Monitor', figsize=(7,2))
 ax.set_title('Device Usage')
 plt.ylabel('Usage (%)')
 
