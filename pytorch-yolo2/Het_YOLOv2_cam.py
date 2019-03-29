@@ -4,7 +4,7 @@
 # Please refer to : https://github.com/marvis/
 # Original implementation of YOLOv2 can be found in: https://pjreddie.com/darknet/yolo
 
-# Modifications to include TX2 onboard camera detection, model partitioning and device monitor 
+# Modifications to include TX2 onboard camera detection, heterogeneous model partitioning and device monitor 
 # by: Walther Carballo Hernandez
 # Please refer to: https://github.com/walcarher
 # Modifications Copyright (c) 2019 Institut Pascal
@@ -45,16 +45,24 @@ parser.add_argument("-w", "--weights",
 		 help = "path to the weights file",
 		 )
 parser.add_argument("-g", "--gpu", type = int, choices=[0, 1],
-		 help = "enables gpu mode for inference 0 (default) for CPU mode and 1 for GPU mode",
-		 default = 0)
+		 help = "enables FULL GPU mode for inference 0 for heterogeneous mode and 1 for GPU mode",
+		 default = 1)
 parser.add_argument("-m", "--monitor", type = int, choices=[0, 1],
 		 help = "enables the monitoring of usage percentage of available devices",
 		 default = 0)
 args = parser.parse_args()
 
 def demo(cfgfile, weightfile):
-    m = Darknet(cfgfile)
+    # This vector decides in which Device the layer will be computed 0 for CPU 1 for GPU
+    het_part = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+ 		0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+		1, 1])
+    m = Darknet(cfgfile, het_part)
     m.print_network()
+    if len(m.models) != len(het_part):
+    	print('Number of model layers and partition vector mismatch')
+    	exit(-1)
     m.load_weights(weightfile)
     print('Loading weights from %s... Done!' % (weightfile))
 

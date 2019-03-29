@@ -58,10 +58,10 @@ class EmptyModule(nn.Module):
 
 # support route shortcut and reorg
 class Darknet(nn.Module):
-    def __init__(self, cfgfile):
+    def __init__(self, cfgfile, het_part):
         super(Darknet, self).__init__()
         self.blocks = parse_cfg(cfgfile)
-        self.models = self.create_network(self.blocks) # merge conv, bn,leaky
+        self.models = self.create_network(self.blocks, het_part) # merge conv, bn,leaky
         self.loss = self.models[len(self.models)-1]
 
         self.width = int(self.blocks[0]['width'])
@@ -81,13 +81,16 @@ class Darknet(nn.Module):
         self.loss = None
         outputs = dict()
         for block in self.blocks:
-            ind = ind + 1
-            #if ind > 0:
-            #    return x
-
+            # Check the device of the input. If it is in the same device as the layer do nothing
+            # if the input tensor is in a different device send transfer the tensor to the desired 
+            # device from het_part vector
+            ind = ind + 1 
             if block['type'] == 'net':
                 continue
             elif block['type'] == 'convolutional' or block['type'] == 'maxpool' or block['type'] == 'reorg' or block['type'] == 'avgpool' or block['type'] == 'softmax' or block['type'] == 'connected':
+		######################################################################		
+		#if ind >= 14:
+		#	x = x.to(device = 'cuda')
                 x = self.models[ind](x)
                 outputs[ind] = x
             elif block['type'] == 'route':
@@ -129,7 +132,7 @@ class Darknet(nn.Module):
     def print_network(self):
         print_cfg(self.blocks)
 
-    def create_network(self, blocks):
+    def create_network(self, blocks, het_part):
         models = nn.ModuleList()
     
         prev_filters = 3
@@ -239,7 +242,11 @@ class Darknet(nn.Module):
                 models.append(loss)
             else:
                 print('unknown type %s' % (block['type']))
-    
+            
+        # After model parsing and definition load divide depending on the het_part vector
+        for model_id in range(len(het_part)):
+		if het_part[model_id] == 1:
+			models[model_id].cuda() # Set the model in the GPU     
         return models
 
     def load_weights(self, weightfile):
