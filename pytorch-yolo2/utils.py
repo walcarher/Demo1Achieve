@@ -321,7 +321,7 @@ def image2torch(img):
     img = img.float().div(255.0)
     return img
 
-def do_detect(model, img, conf_thresh, nms_thresh, use_cuda):
+def do_detect(model, img, conf_thresh, nms_thresh, use_cuda, het_part):
     model.eval()
     t0 = time.time()
 
@@ -340,12 +340,12 @@ def do_detect(model, img, conf_thresh, nms_thresh, use_cuda):
 
     t1 = time.time()
 
-    if use_cuda:
-        img = img.cuda()
+    #if use_cuda:
+    #    img = img.cuda()
     img = torch.autograd.Variable(img)
     t2 = time.time()
 
-    output = model(img)
+    output = model(img, het_part)
     output = output.data
    
     #for j in range(100):

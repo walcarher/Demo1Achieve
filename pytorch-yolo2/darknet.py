@@ -76,7 +76,7 @@ class Darknet(nn.Module):
         self.header = torch.IntTensor([0,0,0,0])
         self.seen = 0
 
-    def forward(self, x):
+    def forward(self, x, het_part):
         ind = -2
         self.loss = None
         outputs = dict()
@@ -88,10 +88,11 @@ class Darknet(nn.Module):
             if block['type'] == 'net':
                 continue
             elif block['type'] == 'convolutional' or block['type'] == 'maxpool' or block['type'] == 'reorg' or block['type'] == 'avgpool' or block['type'] == 'softmax' or block['type'] == 'connected':
-		######################################################################		
-		#if ind >= 14:
-		#	x = x.to(device = 'cuda')
-                x = self.models[ind](x)
+		if het_part[ind] == 1 and not x.is_cuda:
+	    		x = x.to('cuda')
+		elif het_part[ind] == 0 and x.is_cuda:
+			x = x.to('cpu')
+		x = self.models[ind](x)
                 outputs[ind] = x
             elif block['type'] == 'route':
                 layers = block['layers'].split(',')
@@ -246,10 +247,10 @@ class Darknet(nn.Module):
         # After model parsing and definition load divide depending on the het_part vector
         for model_id in range(len(het_part)):
 		if het_part[model_id] == 1:
-			models[model_id].cuda() # Set the model in the GPU     
+			models[model_id] = models[model_id].cuda() # Set the model in the GPU     
         return models
 
-    def load_weights(self, weightfile):
+    def load_weights(self, weightfile, het_part):
         fp = open(weightfile, 'rb')
         header = np.fromfile(fp, count=4, dtype=np.int32)
         self.header = torch.from_numpy(header)
@@ -269,15 +270,15 @@ class Darknet(nn.Module):
                 model = self.models[ind]
                 batch_normalize = int(block['batch_normalize'])
                 if batch_normalize:
-                    start = load_conv_bn(buf, start, model[0], model[1])
+                    start = load_conv_bn(buf, start, model[0], model[1], het_part[ind])
                 else:
-                    start = load_conv(buf, start, model[0])
+                    start = load_conv(buf, start, model[0], het_part[ind])
             elif block['type'] == 'connected':
                 model = self.models[ind]
                 if block['activation'] != 'linear':
-                    start = load_fc(buf, start, model[0])
+                    start = load_fc(buf, start, model[0], het_part[ind])
                 else:
-                    start = load_fc(buf, start, model)
+                    start = load_fc(buf, start, model, het_part[ind])
             elif block['type'] == 'maxpool':
                 pass
             elif block['type'] == 'reorg':

@@ -54,8 +54,8 @@ args = parser.parse_args()
 
 def demo(cfgfile, weightfile):
     # This vector decides in which Device the layer will be computed 0 for CPU 1 for GPU
-    het_part = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
- 		0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+    het_part = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+ 		1, 1, 1, 1, 0, 1, 1, 1, 1, 1,
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 		1, 1])
     m = Darknet(cfgfile, het_part)
@@ -63,7 +63,7 @@ def demo(cfgfile, weightfile):
     if len(m.models) != len(het_part):
     	print('Number of model layers and partition vector mismatch')
     	exit(-1)
-    m.load_weights(weightfile)
+    m.load_weights(weightfile, het_part)
     print('Loading weights from %s... Done!' % (weightfile))
 
     if m.num_classes == 20:
@@ -75,8 +75,8 @@ def demo(cfgfile, weightfile):
     class_names = load_class_names(namesfile)
  
     use_cuda = args.gpu
-    if use_cuda:
-        m.cuda()
+    #if use_cuda:
+        #m.cuda()
 
     cap = cv2.VideoCapture("nvcamerasrc ! video/x-raw(memory:NVMM), width=(int)640, height=(int)480, format=(string)I420, framerate=(fraction)60/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink")
     if cap.isOpened():
@@ -100,7 +100,7 @@ def demo(cfgfile, weightfile):
         res, img = cap.read()
         if res:
             sized = cv2.resize(img, (m.width, m.height))
-            bboxes = do_detect(m, sized, 0.5, 0.4, use_cuda)
+            bboxes = do_detect(m, sized, 0.5, 0.4, use_cuda, het_part)
             #print('------')
             draw_img = plot_boxes_cv2(img, bboxes, None, class_names)
 	    if showHelp == True:

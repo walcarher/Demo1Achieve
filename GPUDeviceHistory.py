@@ -63,7 +63,7 @@ def initGraph():
     gpuAx.set_ylim(-5, 105)
     gpuAx.set_title('GPU History')
     gpuAx.set_ylabel('GPU Usage (%)')
-    gpuAx.set_xlabel('Seconds');
+    gpuAx.set_xlabel('Samples');
     gpuAx.grid(color='gray', linestyle='dotted', linewidth=1)
 
     gpuLine.set_data([],[])
@@ -95,6 +95,6 @@ def updateGraph(frame):
 
 # Keep a reference to the FuncAnimation, so it does not get garbage collected
 animation = FuncAnimation(fig, updateGraph, frames=200,
-                    init_func=initGraph,  interval=250, blit=True)
+                    init_func=initGraph,  interval=100, blit=True)
 
 plt.show()

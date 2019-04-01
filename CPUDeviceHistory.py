@@ -64,7 +64,7 @@ def initGraph():
     cpuAx.set_ylim(-5, 105)
     cpuAx.set_title('CPUs Average History')
     cpuAx.set_ylabel('CPU Average Usage (%)')
-    cpuAx.set_xlabel('Seconds');
+    cpuAx.set_xlabel('Samples');
     cpuAx.grid(color='gray', linestyle='dotted', linewidth=1)
 
     cpuLine.set_data([],[])
@@ -105,6 +105,6 @@ def updateGraph(frame):
 
 # Keep a reference to the FuncAnimation, so it does not get garbage collected
 animation = FuncAnimation(fig, updateGraph, frames=200,
-                    init_func=initGraph,  interval=250, blit=True)
+                    init_func=initGraph,  interval=100, blit=True)
 
 plt.show()
