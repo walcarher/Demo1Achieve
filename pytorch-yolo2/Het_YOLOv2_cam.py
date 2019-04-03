@@ -45,7 +45,7 @@ parser.add_argument("-w", "--weights",
 		 help = "path to the weights file",
 		 )
 parser.add_argument("-g", "--gpu", type = int, choices=[0, 1],
-		 help = "enables FULL GPU mode for inference 0 for heterogeneous mode and 1 for GPU mode",
+		 help = "enables heterogeneous mode for inference 0 for CPU mode mode 1 for heterogeneous CPU/GPU mode",
 		 default = 1)
 parser.add_argument("-m", "--monitor", type = int, choices=[0, 1],
 		 help = "enables the monitoring of usage percentage of available devices",
@@ -54,10 +54,13 @@ args = parser.parse_args()
 
 def demo(cfgfile, weightfile):
     # This vector decides in which Device the layer will be computed 0 for CPU 1 for GPU
-    het_part = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
- 		1, 1, 1, 1, 0, 1, 1, 1, 1, 1,
-		1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-		1, 1])
+    if args.gpu:
+    	het_part = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+ 			     1, 1, 1, 0, 0, 0, 0, 0, 0, 1,
+ 			     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+ 			     1, 1])
+    else:
+	het_part = np.zeros(32,dtype = int)
     m = Darknet(cfgfile, het_part)
     m.print_network()
     if len(m.models) != len(het_part):

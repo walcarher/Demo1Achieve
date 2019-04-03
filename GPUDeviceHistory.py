@@ -36,7 +36,7 @@ from collections import deque
 # This files are to be found in the L4T version of TX2, this may vary in the future
 gpuLoadFile = '/sys/devices/gpu.0/load'
 
-fig = plt.figure(figsize=(7,2))
+fig = plt.figure(figsize=(7,3))
 plt.subplots_adjust(top=0.85, bottom=0.30)
 fig.set_facecolor('#F2F1F0')
 fig.canvas.set_window_title('GPU Usage History Monitor')

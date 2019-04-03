@@ -38,7 +38,7 @@ cpuLoadFile = '/proc/stat'
 usage = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 total_last = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 idle_last = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-fig = plt.figure(figsize=(7,2))
+fig = plt.figure(figsize=(7,3))
 plt.subplots_adjust(top=0.85, bottom=0.30)
 fig.set_facecolor('#F2F1F0')
 fig.canvas.set_window_title('CPUs Usage History Monitor')

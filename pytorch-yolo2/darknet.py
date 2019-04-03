@@ -88,9 +88,9 @@ class Darknet(nn.Module):
             if block['type'] == 'net':
                 continue
             elif block['type'] == 'convolutional' or block['type'] == 'maxpool' or block['type'] == 'reorg' or block['type'] == 'avgpool' or block['type'] == 'softmax' or block['type'] == 'connected':
-		if het_part[ind] == 1 and not x.is_cuda:
+	    	if het_part[ind] == 1 and not x.is_cuda:
 	    		x = x.to('cuda')
-		elif het_part[ind] == 0 and x.is_cuda:
+	    	elif het_part[ind] == 0 and x.is_cuda:
 			x = x.to('cpu')
 		x = self.models[ind](x)
                 outputs[ind] = x
