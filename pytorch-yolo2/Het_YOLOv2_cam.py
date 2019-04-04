@@ -50,17 +50,22 @@ parser.add_argument("-g", "--gpu", type = int, choices=[0, 1],
 parser.add_argument("-m", "--monitor", type = int, choices=[0, 1],
 		 help = "enables the monitoring of usage percentage of available devices",
 		 default = 0)
+parser.add_argument("-d", "--demo", type = int, choices=[0, 1],
+		 help = "enables the monitoring of usage percentage of available devices",
+		 default = 0)
 args = parser.parse_args()
 
 def demo(cfgfile, weightfile):
     # This vector decides in which Device the layer will be computed 0 for CPU 1 for GPU
     if args.gpu:
     	het_part = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
- 			     1, 1, 1, 0, 0, 0, 0, 0, 0, 1,
+ 			     1, 1, 1, 1, 1, 1, 0, 0, 1, 1,
  			     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
  			     1, 1])
     else:
 	het_part = np.zeros(32,dtype = int)
+    if args.demo:
+    	het_part = np.ones(32,dtype = int)
     m = Darknet(cfgfile, het_part)
     m.print_network()
     if len(m.models) != len(het_part):
