@@ -18,6 +18,9 @@ parser.add_argument("-g", "--gpu", type = int, choices=[0, 1],
 parser.add_argument("-m", "--monitor", type = int, choices=[0, 1],
 		 help = "enables the monitoring of usage percentage of available devices",
 		 default = 0)
+parser.add_argument("-o", "--onnx", type = int, choices=[0, 1],
+		 help = "enables the ONNX model generation for partitioning",
+		 default = 0)
 args = parser.parse_args()
 
 # Use the Jetson onboard camera
@@ -99,8 +102,10 @@ if(torch.cuda.is_available() & args.gpu):
 	device = torch.device(torch.cuda.current_device())
 	torch.cuda.init()
 	alexNet.cuda()
+	dummy_input = torch.randn(10, 3, 224, 224, device='cuda')
 	print('Running inference on GPU mode')
 else:
+	dummy_input = torch.randn(10, 3, 224, 224, device='cpu')
 	device = torch.device("cpu")
 	print('Running inference on CPU mode')
 
@@ -110,6 +115,8 @@ labels = f.readlines()
 # Open device usage monitor if selected 
 if args.monitor:
 	device_monitor_process = subprocess.Popen(["python", "DeviceMonitor.py"])
+	device_monitor_processCPU = subprocess.Popen(["python", "CPUDeviceHistory.py"])
+	device_monitor_processGPU = subprocess.Popen(["python", "GPUDeviceHistory.py"])
 # Open Image Stream and plots
 video_capture=open_onboard_camera()
 read_cam(video_capture)
@@ -117,5 +124,11 @@ video_capture.release()
 cv2.destroyAllWindows()
 if args.monitor:
 	device_monitor_process.terminate()
+	device_monitor_processCPU.terminate()
+	device_monitor_processGPU.terminate()
+if args.onnx:
+	input_names = [ "actual_input_1" ] + [ "learned_%d" % i for i in range(16) ]
+	output_names = [ "output1" ]
+	torch.onnx.export(alexNet, dummy_input, "alexnet.onnx", verbose=True, input_names=input_names, output_names=output_names)
 
 
