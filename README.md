@@ -1,5 +1,7 @@
 # Demo1Achieve
 
+[![DOI](https://zenodo.org/badge/176996629.svg)](https://zenodo.org/badge/latestdoi/176996629)
+
 Demo presented at GDR SOC2 5 April 2019, Paris, France 
 
 Embedded Heterogeneous Partitioning CPU-GPU for pretrained YOLOv2 COCO DataSet and VHDL Code Generation. 
