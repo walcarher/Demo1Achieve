@@ -111,7 +111,7 @@ def convert2cpu_long(gpu_matrix):
     return torch.LongTensor(gpu_matrix.size()).copy_(gpu_matrix)
 
 def get_region_boxes(output, conf_thresh, num_classes, anchors, num_anchors, use_cuda, only_objectness=1, validation=False):
-    anchor_step = len(anchors)/num_anchors
+    anchor_step = len(anchors)//num_anchors
     if output.dim() == 3:
         output = output.unsqueeze(0)
     batch = output.size(0)
@@ -162,10 +162,10 @@ def get_region_boxes(output, conf_thresh, num_classes, anchors, num_anchors, use
     	ws = convert2cpu(ws)
     	hs = convert2cpu(hs)
     if validation:
-	if use_cuda:
-        	cls_confs = convert2cpu(cls_confs.view(-1, num_classes))
-	else:
-		cls_confs = cls_confs.view(-1, num_classes)
+        if use_cuda:
+            cls_confs = convert2cpu(cls_confs.view(-1, num_classes))
+        else:
+            cls_confs = cls_confs.view(-1, num_classes)
     t2 = time.time()
     for b in range(batch):
         boxes = []
@@ -219,10 +219,10 @@ def plot_boxes_cv2(img, boxes, savename=None, class_names=None, color=None):
     height = img.shape[0]
     for i in range(len(boxes)):
         box = boxes[i]
-        x1 = int(round((box[0] - box[2]/2.0) * width))
-        y1 = int(round((box[1] - box[3]/2.0) * height))
-        x2 = int(round((box[0] + box[2]/2.0) * width))
-        y2 = int(round((box[1] + box[3]/2.0) * height))
+        x1 = int(np.round((box[0] - box[2]/2.0) * width))
+        y1 = int(np.round((box[1] - box[3]/2.0) * height))
+        x2 = int(np.round((box[0] + box[2]/2.0) * width))
+        y2 = int(np.round((box[1] + box[3]/2.0) * height))
 
         if color:
             rgb = color

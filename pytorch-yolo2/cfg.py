@@ -228,8 +228,8 @@ def load_fc(buf, start, fc_model, device):
     	fc_model.bias.data.copy_(torch.from_numpy(buf[start:start+num_b]));     start = start + num_b
     	fc_model.weight.data.copy_(torch.from_numpy(buf[start:start+num_w]));   start = start + num_w 
     else:
-	fc_model.bias.data.copy_(torch.from_numpy(buf[start:start+num_b])).cuda();     start = start + num_b
-    	fc_model.weight.data.copy_(torch.from_numpy(buf[start:start+num_w])).cuda();   start = start + num_w
+        fc_model.bias.data.copy_(torch.from_numpy(buf[start:start+num_b])).cuda();  start = start + num_b
+        fc_model.weight.data.copy_(torch.from_numpy(buf[start:start+num_w])).cuda();    start = start + num_w
     return start
 
 def save_fc(fp, fc_model):

@@ -59,11 +59,11 @@ def demo(cfgfile, weightfile):
     # This vector decides in which Device the layer will be computed 0 for CPU 1 for GPU
     if args.gpu:
     	het_part = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
- 			     1, 1, 1, 1, 1, 1, 0, 0, 1, 1,
+ 			     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
  			     1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
  			     1, 1])
     else:
-	het_part = np.zeros(32,dtype = int)
+        het_part = np.zeros(32,dtype = int)
     if args.demo:
     	het_part = np.ones(32,dtype = int)
     m = Darknet(cfgfile, het_part)
@@ -86,20 +86,21 @@ def demo(cfgfile, weightfile):
     #if use_cuda:
         #m.cuda()
 
-    cap = cv2.VideoCapture("nvcamerasrc ! video/x-raw(memory:NVMM), width=(int)640, height=(int)480, format=(string)I420, framerate=(fraction)60/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink")
+    #cap = cv2.VideoCapture("nvcamerasrc ! video/x-raw(memory:NVMM), width=(int)640, height=(int)480, format=(string)I420, framerate=(fraction)60/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink")
+    cap = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1920, height=(int)1080,format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink drop=1")
     if cap.isOpened():
     	# Window creation and specifications
         windowName = cfgfile
         cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
-	cv2.moveWindow(windowName,1920-1280,0)
+        cv2.moveWindow(windowName,1920-1280,0)
         cv2.resizeWindow(windowName,1280,1080)
         cv2.setWindowTitle(windowName,"YOLOv2 Object Detection")
         font = cv2.FONT_HERSHEY_PLAIN
         helpText="'Esc' to Quit"
         showFullScreen = False
-	showHelp = True
-	start = 0.0
-	end = 0.0
+        showHelp = True
+        start = 0.0
+        end = 0.0
     else:
         print("Unable to open camera")
         exit(-1)
@@ -109,18 +110,18 @@ def demo(cfgfile, weightfile):
         if res:
             sized = cv2.resize(img, (m.width, m.height))
             bboxes = do_detect(m, sized, 0.5, 0.4, use_cuda, het_part)
-            #print('------')
+            print('------')
             draw_img = plot_boxes_cv2(img, bboxes, None, class_names)
-	    if showHelp == True:
+            if showHelp == True:
                 cv2.putText(img, helpText, (11,20), font, 1.0, (32,32,32), 4, cv2.LINE_AA)
                 cv2.putText(img, helpText, (10,20), font, 1.0, (240,240,240), 1, cv2.LINE_AA)
             end = time.time()
             cv2.putText(img, "{0:.0f}fps".format(1/(end-start)), (531,50), font, 3.0, (32,32,32), 8, cv2.LINE_AA)
             cv2.putText(img, "{0:.0f}fps".format(1/(end-start)), (530,50), font, 3.0, (240,240,240), 2, cv2.LINE_AA)
             cv2.imshow(windowName, draw_img)
-	    start = time.time()
+            start = time.time()
             key = cv2.waitKey(1)
-	    if key == 27: # Check for ESC key
+            if key == 27: # Check for ESC key
                 cv2.destroyAllWindows()
                 break;
             elif key==74: # Toggle fullscreen; This is the F3 key on this particular keyboard
@@ -129,20 +130,21 @@ def demo(cfgfile, weightfile):
                     cv2.setWindowProperty(windowName, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
                 else:
                     cv2.setWindowProperty(windowName, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL) 
-                showFullScreen = not showFullScreen
+                    showFullScreen = not showFullScreen
         else:
              print("Unable to read image")
              exit(-1) 
 
 ############################################
 if __name__ == '__main__':
-	if args.monitor:
-		device_monitor_process = subprocess.Popen(["python", "../DeviceMonitor.py"])
-		gpu_history_process = subprocess.Popen(["python", "../GPUDeviceHistory.py"])
-		cpu_history_process = subprocess.Popen(["python", "../CPUDeviceHistory.py"])
-        demo(args.cfg, args.weights)
-	if args.monitor:	
-		device_monitor_process.terminate()
-		gpu_history_process.terminate()
-		cpu_history_process.terminate()
+    if args.monitor:
+        #device_monitor_process = subprocess.Popen(["python3", "../DeviceMonitor.py"])
+        #gpu_history_process = subprocess.Popen(["python3", "../GPUDeviceHistory.py"])
+        #cpu_history_process = subprocess.Popen(["python3", "../CPUDeviceHistory.py"])
+        device_monitor_process = subprocess.Popen(["python3", "../CPU-FPGA-GPU_PowerMonitor.py"])
+    demo(args.cfg, args.weights)
+    if args.monitor:	
+        device_monitor_process.terminate()
+        #gpu_history_process.terminate()
+        #cpu_history_process.terminate()
 
